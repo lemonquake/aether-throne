@@ -175,12 +175,15 @@ export class Entity {
    * @param {number} rawDamage - Pre-mitigation rolled damage.
    * @param {string} attackType - 'NORMAL'|'PIERCE'|'MAGIC'|'SIEGE'.
    * @param {Entity|null} attacker - Damage source (for kill credit / events).
+   * @param {object|null} [context] - Optional hit metadata for presentation systems.
    */
-  takeDamage(rawDamage, attackType, attacker) {
+  takeDamage(rawDamage, attackType, attacker, context = null) {
     if (this.isDead || this.isInvulnerable) return; // corpses and invulnerable entities take no damage
     const finalDamage = computeDamage(rawDamage, attackType, this.type.armor, this.type.armorType);
     this.hp -= finalDamage;
-    eventBus.emit(EVENTS.UNIT_DAMAGED, { entity: this, amount: finalDamage, attacker });
+    const payload = { entity: this, amount: finalDamage, attacker };
+    if (context) Object.assign(payload, context);
+    eventBus.emit(EVENTS.UNIT_DAMAGED, payload);
     if (this.hp <= 0) {
       this.hp = 0;
       this.die(attacker ?? null);

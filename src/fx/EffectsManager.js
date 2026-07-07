@@ -30,6 +30,9 @@ const FX = GAME_CONFIG.FX;
 const KINDS = {
   impact: { start: 0.35, end: 1.1, color: '#ffe6a0', life: 0.26 },
   flash: { start: 0.6, end: 2.0, color: '#fff3cf', life: 0.15 },
+  blood: { start: 0.42, end: 1.55, color: '#b91414', life: 0.34 },
+  chip: { start: 0.34, end: 0.08, color: '#c9bfa8', life: 0.48 },
+  dust: { start: 0.75, end: 2.4, color: '#a98355', life: 0.5 },
   spark: { start: 0.5, end: 0.06, color: '#ffd27a', life: 0.4 },
   death: { start: 0.9, end: 3.2, color: '#c9c4d6', life: 0.6 },
   debris: { start: 0.55, end: 0.12, color: '#b3a992', life: 0.65 },
@@ -215,6 +218,7 @@ export class EffectsManager {
 
     this._unsubs = [
       eventBus.on(EVENTS.UNIT_DAMAGED, (p) => this._onDamage(p)),
+      eventBus.on(EVENTS.PROJECTILE_IMPACT, (p) => this._onProjectileImpact(p)),
       eventBus.on(EVENTS.UNIT_DIED, (p) => this._onDeath(p)),
       eventBus.on(EVENTS.BUILDING_DESTROYED, (p) => this._onBuildingExplode(p)),
       eventBus.on(EVENTS.BUILDING_COMPLETE, (p) => this._at('build', p?.entity)),
@@ -247,6 +251,7 @@ export class EffectsManager {
    * @param {{entity:object, amount:number}} p @private
    */
   _onDamage(p) {
+    if (p?.projectile) return;
     const e = p?.entity;
     if (!e || !e.position) return;
     const color = this._impactColor(e);
@@ -267,6 +272,110 @@ export class EffectsManager {
         vz: Math.sin(ang) * out,
         grav: 9,
         scale: (0.4 + Math.random() * 0.5) * (1 + heavy),
+      });
+    }
+  }
+
+  _onProjectileImpact(p) {
+    if (!p?.position) return;
+    if (p.surface === 'ground') {
+      this._projectileGroundImpact(p);
+      return;
+    }
+    if (p.surface === 'structure' || p.target?.type?.class === 'BUILDING') {
+      this._projectileStructureImpact(p);
+      return;
+    }
+    this._projectileUnitImpact(p);
+  }
+
+  _projectileUnitImpact(p) {
+    const target = p.target;
+    const color = this._impactColor(target);
+    _pos.copy(p.position);
+    if (_pos.y < 0.35) _pos.y = (target?.position?.y ?? 0) + 0.75;
+
+    const race = target?.type?.race;
+    const bloodLike = race === 'BIO_HUMAN' || race === 'NEUTRAL_HOSTILE';
+    const slimeLike = race === 'CHAOS_DEEP';
+    const stoneLike = race === 'TERRA_BORN';
+
+    this.spawn('flash', _pos, '#fff3cf', { scale: bloodLike ? 0.6 : 0.72 });
+    if (bloodLike || slimeLike) {
+      this.spawn('blood', _pos, color, { scale: bloodLike ? 1.0 : 0.85 });
+      this.spawnBloodSplat(_pos, color, bloodLike ? 0.48 : 0.36);
+    } else {
+      this.spawn('impact', _pos, color, { scale: 0.82 });
+    }
+
+    const count = stoneLike ? 8 : 6;
+    for (let i = 0; i < count; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const out = 1.4 + Math.random() * (stoneLike ? 3.8 : 2.6);
+      this.spawn(stoneLike ? 'chip' : 'spark', _pos, color, {
+        vx: Math.cos(ang) * out,
+        vy: 1.0 + Math.random() * (stoneLike ? 2.3 : 1.8),
+        vz: Math.sin(ang) * out,
+        grav: slimeLike ? 5 : 9,
+        scale: 0.45 + Math.random() * 0.55,
+      });
+    }
+  }
+
+  _projectileStructureImpact(p) {
+    const target = p.target;
+    _pos.copy(p.position);
+    if (_pos.y < 0.35) _pos.y = (target?.position?.y ?? 0) + 0.9;
+
+    this.spawn('flash', _pos, '#fff0c8', { scale: 0.9 });
+    this.spawn('impact', _pos, '#d8c79a', { scale: 1.15 });
+    this.spawnLight(_pos, '#ffcf8a', { intensity: 1.5, distance: 8, life: 0.18, height: 0.2 });
+
+    for (let i = 0; i < 9; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const out = 2.0 + Math.random() * 4.2;
+      this.spawn(i % 3 === 0 ? 'debris' : 'chip', _pos, i % 2 ? '#b9ad99' : '#8a8174', {
+        vx: Math.cos(ang) * out,
+        vy: 1.4 + Math.random() * 3.0,
+        vz: Math.sin(ang) * out,
+        grav: 11,
+        scale: 0.6 + Math.random() * 0.7,
+      });
+    }
+    this.spawnSmoke(_pos, {
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: 1.0 + Math.random() * 0.8,
+      vz: (Math.random() - 0.5) * 0.8,
+      scale: 0.75 + Math.random() * 0.45,
+      life: 0.7 + Math.random() * 0.3,
+    });
+  }
+
+  _projectileGroundImpact(p) {
+    _pos.copy(p.position);
+    _pos.y = this.engine.terrain?.getHeightAt
+      ? this.engine.terrain.getHeightAt(_pos.x, _pos.z) + 0.08
+      : 0.08;
+
+    this.spawn('dust', _pos, '#9a734a', { scale: 0.85 });
+    this._spawnShockwave(_pos, 1.6, '#b9905f');
+    this.spawnSmoke(_pos, {
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: 0.75 + Math.random() * 0.55,
+      vz: (Math.random() - 0.5) * 0.45,
+      scale: 0.65 + Math.random() * 0.35,
+      life: 0.65 + Math.random() * 0.25,
+    });
+
+    for (let i = 0; i < 5; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const out = 1.2 + Math.random() * 2.0;
+      this.spawn('chip', _pos, '#7f684f', {
+        vx: Math.cos(ang) * out,
+        vy: 0.65 + Math.random() * 1.3,
+        vz: Math.sin(ang) * out,
+        grav: 10,
+        scale: 0.35 + Math.random() * 0.35,
       });
     }
   }
@@ -450,7 +559,7 @@ export class EffectsManager {
 
   /**
    * Emit an effect of `kind` at a world position.
-   * @param {'impact'|'flash'|'spark'|'death'|'debris'|'build'|'fireball'|'bigflash'} kind
+   * @param {'impact'|'flash'|'blood'|'chip'|'dust'|'spark'|'death'|'debris'|'build'|'fireball'|'bigflash'} kind
    * @param {THREE.Vector3} worldPos - Anchor (copied, not retained; y used as-is).
    * @param {string} [colorOverride] - '#rrggbb' tint (faction blood/sparks).
    * @param {{vx?:number,vy?:number,vz?:number,grav?:number,scale?:number}} [motion]

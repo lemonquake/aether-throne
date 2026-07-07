@@ -5,10 +5,12 @@
  *
  * Behavior (WC3-style tracking projectile): once fired, the bolt homes on its
  * target's live position until it lands, then applies damage through the
- * target's `takeDamage`. If the target dies mid-flight the bolt fizzles at its
- * last position (no damage, slot recycled).
+ * target's `takeDamage`. If the target dies mid-flight the bolt fizzles into
+ * the ground at its last position, then recycles the slot.
  */
 import * as THREE from 'three';
+import { eventBus, EVENTS } from '../engine/EventBus.js';
+import { ENTITY_CLASS } from '../config/UnitTypes.js';
 
 /** Shared geometry for every bolt in the pool (one small glowing shard). */
 let _boltGeometry = null;
@@ -43,6 +45,7 @@ export class Projectile {
 
     // Reused each frame — no per-update allocation.
     this._pos = this.mesh.position;
+    this._impactPos = new THREE.Vector3();
   }
 
   /**
@@ -81,6 +84,7 @@ export class Projectile {
     const target = this.target;
     // Fizzle if the target is gone or the fuse burned out.
     if (!target || target.isDead || this.ttl <= 0) {
+      this._emitImpact('ground', null, this._pos);
       this._deactivate();
       return false;
     }
@@ -99,7 +103,25 @@ export class Projectile {
 
     if (dist <= step + hitRadius) {
       // Landed — apply damage through the shared mitigation pipeline.
-      target.takeDamage(this.rawDamage, this.attackType, this.source);
+      const surface = this._surfaceFor(target);
+      if (dist > 1e-6) {
+        const inv = 1 / dist;
+        const travel = Math.max(0, dist - hitRadius * 0.55);
+        this._impactPos.set(
+          this._pos.x + dx * inv * travel,
+          this._pos.y + dy * inv * travel,
+          this._pos.z + dz * inv * travel,
+        );
+      } else {
+        this._impactPos.set(tx, ty, tz);
+      }
+      this._pos.copy(this._impactPos);
+      this._emitImpact(surface, target, this._impactPos);
+      target.takeDamage(this.rawDamage, this.attackType, this.source, {
+        projectile: true,
+        impactPosition: this._impactPos,
+        impactSurface: surface,
+      });
       this._deactivate();
       return false;
     }
@@ -109,6 +131,20 @@ export class Projectile {
     this._pos.y += dy * inv * step;
     this._pos.z += dz * inv * step;
     return true;
+  }
+
+  _surfaceFor(target) {
+    return target?.type?.class === ENTITY_CLASS.BUILDING ? 'structure' : 'unit';
+  }
+
+  _emitImpact(surface, target, position) {
+    eventBus.emit(EVENTS.PROJECTILE_IMPACT, {
+      source: this.source,
+      target,
+      position,
+      surface,
+      attackType: this.attackType,
+    });
   }
 
   /** Park the slot (hidden, inert) so the pool can reuse it. @private */

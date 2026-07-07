@@ -1353,9 +1353,10 @@ export class Unit extends Entity {
    * Take damage through the base mitigation pipeline, then kick off the visible
    * hit-flinch (a quick recoil so the player can read that a unit is under fire).
    * @param {number} rawDamage @param {string} attackType @param {Entity|null} attacker
+   * @param {object|null} [context]
    */
-  takeDamage(rawDamage, attackType, attacker) {
-    super.takeDamage(rawDamage, attackType, attacker);
+  takeDamage(rawDamage, attackType, attacker, context = null) {
+    super.takeDamage(rawDamage, attackType, attacker, context);
     this._lastCombatTime = this.engine.gameTime ?? 0; // suppress regen while under fire
     if (!this.isDead) {
       this._hitAnim = 0;

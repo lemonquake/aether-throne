@@ -114,6 +114,8 @@ export const EVENTS = {
   UNIT_DIED: 'entity:unitDied',
   /** { entity, amount, attacker } */
   UNIT_DAMAGED: 'entity:unitDamaged',
+  /** { source, target, position, surface:'unit'|'structure'|'ground', attackType } */
+  PROJECTILE_IMPACT: 'combat:projectileImpact',
   /** { entity } */
   BUILDING_PLACED: 'entity:buildingPlaced',
   /** { entity } */

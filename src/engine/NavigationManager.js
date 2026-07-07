@@ -1,8 +1,13 @@
 import * as THREE from 'three';
 import { GAME_CONFIG } from '../config/GameConfig.js';
+import { ARCHETYPE } from '../config/UnitTypes.js';
 
 const PATH = GAME_CONFIG.PATH;
 const NEXT_WAYPOINT_DISTANCE = 1.0;
+
+function hasPhasedUnitMovement(unit) {
+  return unit?.type?.archetype === ARCHETYPE.WORKER;
+}
 
 class MockVector3 extends THREE.Vector3 {
   squaredLength() {
@@ -265,6 +270,7 @@ export class NavigationManager {
             for (let k = 0; k < bucket.length; k++) {
               const vB = bucket[k];
               if (vA.unit.id >= vB.unit.id || vB.unit.isDead) continue;
+              if (hasPhasedUnitMovement(vA.unit) || hasPhasedUnitMovement(vB.unit)) continue;
 
               const posB = vB.position;
               const rB = vB.boundingRadius;

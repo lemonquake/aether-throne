@@ -665,9 +665,10 @@ export class Building extends Entity {
    * Take damage through the base pipeline, then kick off a brief hit-shake so
    * a structure visibly flinches under fire (subtle jitter, decays fast).
    * @param {number} rawDamage @param {string} attackType @param {Entity|null} attacker
+   * @param {object|null} [context]
    */
-  takeDamage(rawDamage, attackType, attacker) {
-    super.takeDamage(rawDamage, attackType, attacker);
+  takeDamage(rawDamage, attackType, attacker, context = null) {
+    super.takeDamage(rawDamage, attackType, attacker, context);
     if (!this.isDead) this._shake = SHAKE_TIME;
   }
 
