@@ -172,11 +172,12 @@ export class PhysicsWorld {
     }
 
     // Compute the allowed movement given static collisions.
-    this._controller.computeColliderMovement(collider, {
-      x: desired.x,
-      y: 0,
-      z: desired.z,
-    });
+    this._controller.computeColliderMovement(
+      collider,
+      { x: desired.x, y: 0, z: desired.z },
+      undefined,
+      UNIT_GROUPS
+    );
     const corrected = this._controller.computedMovement();
 
     let cx = corrected.x;

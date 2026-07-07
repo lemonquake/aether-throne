@@ -6,7 +6,14 @@ const PATH = GAME_CONFIG.PATH;
 const NEXT_WAYPOINT_DISTANCE = 1.0;
 
 function hasPhasedUnitMovement(unit) {
-  return unit?.type?.archetype === ARCHETYPE.WORKER;
+  if (!unit || !unit.type) return false;
+  return unit.type.archetype === 'WORKER' || 
+         unit.type.id?.toLowerCase().includes('worker') ||
+         unit.type.id?.toLowerCase().includes('acolyte') ||
+         unit.type.id?.toLowerCase().includes('thrall') ||
+         unit.type.id?.toLowerCase().includes('drone') ||
+         unit.type.id?.toLowerCase().includes('golemling') ||
+         unit.type.id?.toLowerCase().includes('dredger');
 }
 
 class MockVector3 extends THREE.Vector3 {
