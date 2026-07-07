@@ -1,0 +1,534 @@
+/* Map Editor CSS Styles */
+
+.editor-root {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #04060b;
+  color: #e2e8f0;
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  z-index: 20;
+  user-select: none;
+  pointer-events: auto; /* Allow pointer events */
+}
+
+/* 3D Canvas Viewport */
+.editor-viewport {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  outline: none;
+}
+
+/* Overlay Panels (float on top of viewport) */
+.editor-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none; /* Let clicks pass to canvas except on panels */
+  z-index: 10;
+}
+
+.editor-panel {
+  background: rgba(8, 12, 20, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  pointer-events: auto; /* Clickable */
+  transition: all 0.25s ease-in-out;
+}
+
+.editor-panel:hover {
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+/* Top Action Bar */
+.editor-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 3.5rem;
+  padding: 0 1.5rem;
+  margin: 0.75rem;
+  border-radius: 6px;
+}
+
+.editor-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.editor-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: linear-gradient(90deg, #00e5ff, #8a2be2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.editor-map-name-input {
+  background: rgba(16, 24, 38, 0.6);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  outline: none;
+  width: 12rem;
+  transition: border-color 0.2s;
+}
+
+.editor-map-name-input:focus {
+  border-color: #00e5ff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.25);
+}
+
+.editor-top-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Bottom Bar / Status Bar */
+.editor-statusbar {
+  margin: 0.75rem;
+  margin-top: 0;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #a0aec0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Middle Layout */
+.editor-middle {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  overflow: hidden;
+  padding: 0 0.75rem;
+}
+
+/* Left Sidebar (Tool Select) */
+.editor-sidebar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 4rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 6px;
+  height: fit-content;
+  align-self: center;
+}
+
+.editor-tool-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 28, 42, 0.4);
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.25rem;
+}
+
+.editor-tool-btn:hover {
+  color: #00e5ff;
+  border-color: rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.editor-tool-btn.active {
+  color: #fff;
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.15);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+}
+
+.editor-tool-label {
+  font-size: 0.6rem;
+  margin-top: 0.2rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Right Sidebar (Tool Controls) */
+.editor-sidebar-right {
+  width: 18rem;
+  max-height: 80%;
+  border-radius: 6px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-self: center;
+  overflow-y: auto;
+}
+
+.editor-section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #00e5ff;
+  margin: 0 0 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  padding-bottom: 0.35rem;
+}
+
+.editor-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.editor-control-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editor-control-label {
+  font-size: 0.85rem;
+  color: #cbd5e0;
+}
+
+.editor-control-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #00e5ff;
+}
+
+/* Slider Controls */
+.editor-slider {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.editor-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.6);
+  transition: transform 0.1s;
+}
+
+.editor-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Grid Selector Option Blocks */
+.editor-grid-select {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+}
+
+.editor-grid-option {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(20, 28, 42, 0.4);
+  border-radius: 4px;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editor-grid-option:hover {
+  border-color: rgba(0, 229, 255, 0.3);
+  color: #00e5ff;
+}
+
+.editor-grid-option.active {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.1);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Selectable items for Unit/Structure tool */
+.editor-asset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 12rem;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: rgba(10, 15, 25, 0.5);
+  padding: 0.25rem;
+}
+
+.editor-asset-item {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #cbd5e0;
+  transition: all 0.15s;
+  display: flex;
+  justify-content: space-between;
+}
+
+.editor-asset-item:hover {
+  background: rgba(0, 229, 255, 0.08);
+  color: #00e5ff;
+}
+
+.editor-asset-item.active {
+  background: rgba(0, 229, 255, 0.18);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Common Button Styles */
+.btn-editor {
+  background: rgba(20, 28, 42, 0.7);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  color: #cbd5e0;
+  border-radius: 4px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.btn-editor:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: #00e5ff;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.btn-editor-primary {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00e5ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-editor-primary:hover {
+  background: rgba(0, 229, 255, 0.25);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.45);
+}
+
+.btn-editor-danger {
+  background: rgba(255, 59, 59, 0.1);
+  border-color: #ff3b3b;
+  color: #ff8b8b;
+}
+
+.btn-editor-danger:hover {
+  background: rgba(255, 59, 59, 0.2);
+  border-color: #ff5555;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.35);
+}
+
+/* Modals / Dialogs */
+.editor-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 5, 10, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.editor-modal {
+  width: 24rem;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.editor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editor-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #00e5ff;
+  margin: 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.editor-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.editor-text-input,
+.editor-select {
+  background: rgba(16, 24, 38, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.editor-text-input:focus,
+.editor-select:focus {
+  border-color: #00e5ff;
+}
+
+.editor-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editor-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(20, 28, 42, 0.5);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+}
+
+.editor-checkbox:checked {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: #00e5ff;
+}
+
+.editor-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 3px;
+  font-size: 11px;
+  color: #00e5ff;
+  font-weight: 900;
+}
+
+/* Scrollbar customization */
+.editor-sidebar-right::-webkit-scrollbar,
+.editor-asset-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.editor-sidebar-right::-webkit-scrollbar-track,
+.editor-asset-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.editor-sidebar-right::-webkit-scrollbar-thumb,
+.editor-asset-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.2);
+  border-radius: 2px;
+}
+
+.editor-sidebar-right::-webkit-scrollbar-thumb:hover,
+.editor-asset-list::-webkit-scrollbar-thumb:hover {
+  background: #00e5ff;
+}
+
+/* Texture grid selection and preview cards */
+.editor-texture-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.editor-texture-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 18, 30, 0.55);
+  border-radius: 6px;
+  padding: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.editor-texture-card:hover {
+  border-color: rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.editor-texture-card.active {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.editor-texture-preview {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.35rem;
+  background: #111;
+  pointer-events: none;
+}
+
+.editor-texture-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #cbd5e0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.editor-texture-card.active .editor-texture-label {
+  color: #fff;
+  font-weight: 600;
+}
